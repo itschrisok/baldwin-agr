@@ -14,6 +14,8 @@ let isReady = false;
 let checkCount = 0;
 const maxChecks = 50; // 5 seconds max wait
 const originalContent = new Map(); // Store original content for search highlighting
+let newsArticles = []; // Store all articles from API
+let sourcesMap = new Map(); // Map source IDs to source names
 
 /* ============================================
    INITIALIZATION
@@ -76,14 +78,11 @@ function waitForElements() {
 
 /**
  * Main initialization function
- * Sets up all event listeners and stores original content
+ * Sets up all event listeners and loads data from API
  */
 function initializeApp() {
     try {
         console.log('🚀 Starting initialization...');
-
-        // Store original content for search highlighting
-        storeOriginalContent();
 
         // Initialize all features
         initializeSearch();
@@ -92,8 +91,10 @@ function initializeApp() {
         initializeSorting();
         initializeHashtags();
 
-        console.log('✅ Initialization complete');
-        showStatus('✅ Ready');
+        console.log('✅ Event listeners initialized');
+
+        // Load news from API
+        loadNews();
 
     } catch (error) {
         console.error('❌ Initialization failed:', error);
@@ -125,6 +126,187 @@ function storeOriginalContent() {
     });
 
     console.log(`📝 Stored content for ${originalContent.size} items`);
+}
+
+/* ============================================
+   API INTEGRATION
+   ============================================ */
+
+/**
+ * Load news articles from the backend API
+ */
+async function loadNews() {
+    try {
+        showStatus('⏳ Loading articles...');
+
+        // Fetch sources first to build the map
+        const sources = await fetchSources();
+        sources.forEach(source => {
+            sourcesMap.set(source.id, source.name);
+        });
+
+        // Fetch news articles
+        const articles = await fetchNews({ limit: 100 });
+        newsArticles = articles;
+
+        console.log(`📰 Loaded ${articles.length} articles from API`);
+
+        // Render articles
+        renderNewsItems(articles);
+
+        // Store original content for search
+        storeOriginalContent();
+
+        showStatus('✅ Articles loaded');
+
+    } catch (error) {
+        console.error('Error loading news:', error);
+        showError('Failed to load articles. Please refresh the page.');
+    }
+}
+
+/**
+ * Render news items into the DOM
+ */
+function renderNewsItems(articles) {
+    const container = document.getElementById('newsContainer');
+
+    if (!container) {
+        console.error('News container not found');
+        return;
+    }
+
+    // Clear container
+    container.innerHTML = '';
+
+    if (articles.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state" style="text-align: center; padding: 60px 20px; color: #666;">
+                <p style="font-size: 18px; margin-bottom: 10px;">No articles found</p>
+                <p style="font-size: 14px;">Try running the scraper to fetch news articles</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Render each article
+    articles.forEach(article => {
+        const articleEl = createArticleElement(article);
+        container.appendChild(articleEl);
+    });
+
+    console.log(`✅ Rendered ${articles.length} articles`);
+}
+
+/**
+ * Create DOM element for a single article
+ */
+function createArticleElement(article) {
+    const div = document.createElement('div');
+    div.className = 'news-item';
+    div.setAttribute('data-timestamp', article.published_at || article.created_at);
+    div.setAttribute('data-category', article.category || 'local');
+    div.setAttribute('data-content-type', article.content_type || 'news');
+
+    // Get source name
+    const sourceName = sourcesMap.get(article.source_id) || 'Unknown Source';
+
+    // Format timestamp
+    const timeAgo = formatTimeAgo(article.published_at || article.created_at);
+
+    // Determine badge class and text
+    const badgeClass = `badge-${article.content_type || 'news'}`;
+    const badgeText = (article.content_type || 'news').toUpperCase();
+
+    // Build HTML
+    div.innerHTML = `
+        <div class="news-meta">
+            <span class="content-type-badge ${badgeClass}">${badgeText}</span>
+            <span class="news-source">${escapeHtml(sourceName)}</span>
+            <span>${timeAgo}</span>
+            <a href="${escapeHtml(article.url)}" target="_blank" class="citation-link">🔗 Source</a>
+        </div>
+        <a href="${escapeHtml(article.url)}" target="_blank" class="news-title">${escapeHtml(article.title)}</a>
+        ${article.excerpt ? `<div class="news-excerpt">${escapeHtml(article.excerpt)}</div>` : ''}
+        ${article.image_url ? `<div class="media-preview"><img src="${escapeHtml(article.image_url)}" alt="${escapeHtml(article.title)}" loading="lazy"></div>` : ''}
+        <div class="news-tags">
+            ${formatTags(article)}
+        </div>
+    `;
+
+    return div;
+}
+
+/**
+ * Format tags for an article
+ */
+function formatTags(article) {
+    // Tags could come from article.tags array or article.category
+    const tags = [];
+
+    if (article.category) {
+        tags.push(article.category);
+    }
+
+    // If there are additional tags in the future, add them here
+
+    return tags.map(tag => `<span class="news-tag">${escapeHtml(tag)}</span>`).join('');
+}
+
+/**
+ * Format timestamp as "X time ago"
+ */
+function formatTimeAgo(timestamp) {
+    if (!timestamp) return 'Recently';
+
+    const now = new Date();
+    const date = new Date(timestamp);
+    const seconds = Math.floor((now - date) / 1000);
+
+    if (seconds < 60) return 'Just now';
+
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days} day${days !== 1 ? 's' : ''} ago`;
+
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months} month${months !== 1 ? 's' : ''} ago`;
+
+    const years = Math.floor(months / 12);
+    return `${years} year${years !== 1 ? 's' : ''} ago`;
+}
+
+/**
+ * Escape HTML to prevent XSS
+ */
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
+ * Show error message to user
+ */
+function showError(message) {
+    const container = document.getElementById('newsContainer');
+    if (container) {
+        container.innerHTML = `
+            <div class="error-state" style="text-align: center; padding: 60px 20px; color: #c62828; background: #ffebee; border-radius: 8px; margin: 20px;">
+                <p style="font-size: 18px; margin-bottom: 10px;">⚠️ ${escapeHtml(message)}</p>
+                <button onclick="loadNews()" style="padding: 10px 20px; background: #c62828; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+                    Try Again
+                </button>
+            </div>
+        `;
+    }
+    showStatus('❌ Error');
 }
 
 /* ============================================

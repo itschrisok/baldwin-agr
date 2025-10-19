@@ -8,6 +8,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
+const path = require('path');
 const logger = require('./utils/logger');
 
 const app = express();
@@ -42,6 +43,16 @@ app.use((req, res, next) => {
 });
 
 // ============================================
+// STATIC FILE SERVING
+// ============================================
+
+// Serve frontend static files from ../frontend directory
+const frontendPath = path.join(__dirname, '../frontend');
+app.use(express.static(frontendPath));
+
+logger.info(`Serving static files from: ${frontendPath}`);
+
+// ============================================
 // ROUTES
 // ============================================
 
@@ -49,8 +60,8 @@ app.use((req, res, next) => {
 const apiRoutes = require('./routes/api');
 app.use('/api', apiRoutes);
 
-// Root endpoint
-app.get('/', (req, res) => {
+// API info endpoint (for when /api is accessed directly)
+app.get('/api', (req, res) => {
   res.json({
     name: 'Baldwin County News Hub API',
     version: '1.0.0',
@@ -65,12 +76,10 @@ app.get('/', (req, res) => {
   });
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    error: 'Endpoint not found',
-  });
+// Catch-all route: serve index.html for client-side routing
+// This must be AFTER API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 // Error handler
