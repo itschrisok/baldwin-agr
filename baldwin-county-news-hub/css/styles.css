@@ -1,0 +1,652 @@
+/**
+ * Baldwin County News Hub - Stylesheet
+ * A modern, responsive news aggregator for Baldwin County, Alabama
+ */
+
+/* ============================================
+   RESET & BASE STYLES
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+    color: #333;
+}
+
+/* ============================================
+   HEADER & NAVIGATION
+   ============================================ */
+
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+}
+
+/* ============================================
+   CONTROL PANELS
+   ============================================ */
+
+.controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr 300px;
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.source-panel, .hashtag-panel, .content-panel {
+    background: rgba(255,255,255,0.1);
+    padding: 1rem;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+
+.source-panel h3, .hashtag-panel h3, .content-panel h3 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+/* ============================================
+   SOURCE TOGGLES
+   ============================================ */
+
+.source-toggles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.5rem;
+}
+
+.toggle-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(255,255,255,0.1);
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.toggle-item:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 25px;
+    background: #ccc;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.toggle-switch.active {
+    background: #4CAF50;
+}
+
+.toggle-switch::before {
+    content: '';
+    position: absolute;
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    background: white;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+}
+
+.toggle-switch.active::before {
+    transform: translateX(25px);
+}
+
+/* ============================================
+   HASHTAG MANAGEMENT
+   ============================================ */
+
+.hashtag-input {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.hashtag-input input {
+    flex: 1;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.9);
+}
+
+.hashtag-input button {
+    padding: 0.5rem 1rem;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.hashtag-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.hashtag-tag {
+    background: rgba(255,255,255,0.2);
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.hashtag-tag .remove {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* ============================================
+   CONTENT TYPE TOGGLES
+   ============================================ */
+
+.content-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* ============================================
+   MAIN CONTENT LAYOUT
+   ============================================ */
+
+.main-content {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+}
+
+/* ============================================
+   NEWS FEED
+   ============================================ */
+
+.news-feed {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.feed-header {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.feed-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.feed-filters, .feed-sort {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.sort-label {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    margin-right: 0.5rem;
+    color: #666;
+}
+
+.filter-btn, .sort-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+}
+
+.filter-btn.active, .sort-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.sort-btn:hover, .filter-btn:hover {
+    background: #f8f9fa;
+    border-color: #667eea;
+}
+
+.sort-btn.active:hover, .filter-btn.active:hover {
+    background: #5a67d8;
+}
+
+/* ============================================
+   SEARCH FUNCTIONALITY
+   ============================================ */
+
+.feed-search {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.search-container {
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    padding-right: 3rem;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    font-size: 1.2rem;
+}
+
+.search-clear {
+    position: absolute;
+    right: 3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.25rem;
+    border-radius: 50%;
+    display: none;
+}
+
+.search-clear:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.search-results-info {
+    text-align: center;
+    margin-top: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.highlight {
+    background: #fff3cd;
+    padding: 0.1rem 0.2rem;
+    border-radius: 3px;
+}
+
+/* ============================================
+   NEWS ITEMS
+   ============================================ */
+
+.news-item {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    transition: background 0.3s;
+}
+
+.news-item:hover {
+    background: #f8f9fa;
+}
+
+.news-item:last-child {
+    border-bottom: none;
+}
+
+/* Social Media Posts */
+.social-post {
+    background: #f8f9fb;
+    border-left: 4px solid #1da1f2;
+}
+
+.social-post.instagram {
+    border-left-color: #e4405f;
+}
+
+.social-post.tiktok {
+    border-left-color: #000;
+}
+
+/* Media Posts */
+.media-post {
+    background: #fdf8f0;
+    border-left: 4px solid #ff6b35;
+}
+
+/* ============================================
+   CONTENT BADGES & LABELS
+   ============================================ */
+
+.content-type-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.badge-news {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.badge-social {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
+
+.badge-media {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+/* ============================================
+   SOCIAL PLATFORM INDICATORS
+   ============================================ */
+
+.social-platform-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 0.5rem;
+}
+
+.platform-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: bold;
+}
+
+.platform-twitter { background: #1da1f2; }
+.platform-instagram { background: #e4405f; }
+.platform-tiktok { background: #000; }
+
+/* ============================================
+   MEDIA PREVIEW
+   ============================================ */
+
+.media-preview {
+    margin-top: 0.5rem;
+    border-radius: 8px;
+    overflow: hidden;
+    max-height: 200px;
+}
+
+.media-preview img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+/* ============================================
+   CITATION LINKS
+   ============================================ */
+
+.citation-link {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-left: auto;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.citation-link:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+/* ============================================
+   NEWS ITEM METADATA
+   ============================================ */
+
+.news-meta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+    align-items: center;
+}
+
+.news-source {
+    background: #e9ecef;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+.news-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #333;
+    text-decoration: none;
+}
+
+.news-title:hover {
+    color: #667eea;
+}
+
+.news-excerpt {
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+}
+
+.news-tags {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.news-tag {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.trending, .social-feed {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.widget-header {
+    background: #667eea;
+    color: white;
+    padding: 1rem;
+    font-weight: bold;
+}
+
+.widget-content {
+    padding: 1rem;
+}
+
+.trending-item, .social-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 0.9rem;
+}
+
+.trending-item:last-child, .social-item:last-child {
+    border-bottom: none;
+}
+
+.social-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.social-platform {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+/* ============================================
+   STATUS INDICATOR
+   ============================================ */
+
+.app-status {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    display: none;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN - TABLET
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .controls {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .content-panel {
+        grid-column: 1 / -1;
+        margin-top: 1rem;
+    }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN - MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .controls {
+        grid-template-columns: 1fr;
+    }
+
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        order: -1;
+    }
+
+    .feed-controls {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .feed-filters, .feed-sort {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .sort-label {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+        width: 100%;
+        text-align: center;
+    }
+
+    .search-input {
+        font-size: 16px;
+    }
+
+    .content-toggles {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        gap: 0.5rem;
+    }
+
+    .toggle-item {
+        flex: 1;
+        min-width: calc(50% - 0.25rem);
+    }
+
+    .content-panel {
+        margin-top: 0;
+    }
+}

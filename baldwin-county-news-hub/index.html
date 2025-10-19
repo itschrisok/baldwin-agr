@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Baldwin County News Hub - Your source for local news, social media updates, and community information from Baldwin County, Alabama">
+    <meta name="keywords" content="Baldwin County, Alabama news, Orange Beach, Gulf Shores, Foley, local news">
+    <title>Baldwin County News Hub</title>
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+    <!-- Status Indicator -->
+    <div class="app-status" id="appStatus">Initializing...</div>
+
+    <!-- Header with Controls -->
+    <header class="header">
+        <h1>Baldwin County News Hub</h1>
+
+        <div class="controls">
+            <!-- News Sources Panel -->
+            <div class="source-panel">
+                <h3>News Sources</h3>
+                <div class="source-toggles">
+                    <div class="toggle-item" data-source="baldwin-times">
+                        <div class="toggle-switch active"></div>
+                        <span>Baldwin Times</span>
+                    </div>
+                    <div class="toggle-item" data-source="gulf-coast-news">
+                        <div class="toggle-switch active"></div>
+                        <span>Gulf Coast News</span>
+                    </div>
+                    <div class="toggle-item" data-source="orange-beach-today">
+                        <div class="toggle-switch active"></div>
+                        <span>Orange Beach Today</span>
+                    </div>
+                    <div class="toggle-item" data-source="al-com">
+                        <div class="toggle-switch"></div>
+                        <span>AL.com</span>
+                    </div>
+                    <div class="toggle-item" data-source="foley-observer">
+                        <div class="toggle-switch active"></div>
+                        <span>Foley Observer</span>
+                    </div>
+                    <div class="toggle-item" data-source="mobile-register">
+                        <div class="toggle-switch"></div>
+                        <span>Mobile Register</span>
+                    </div>
+                    <div class="toggle-item" data-source="obawebsite">
+                        <div class="toggle-switch active"></div>
+                        <span>OBA Website</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media Hashtags Panel -->
+            <div class="hashtag-panel">
+                <h3>Social Media Tags</h3>
+                <div class="hashtag-input">
+                    <input type="text" placeholder="Add hashtag..." id="hashtagInput">
+                    <button id="addHashtagBtn">Add</button>
+                </div>
+                <div class="hashtag-tags" id="hashtagContainer">
+                    <div class="hashtag-tag">
+                        #BaldwinCounty
+                        <span class="remove">&times;</span>
+                    </div>
+                    <div class="hashtag-tag">
+                        #OrangeBeach
+                        <span class="remove">&times;</span>
+                    </div>
+                    <div class="hashtag-tag">
+                        #GulfShores
+                        <span class="remove">&times;</span>
+                    </div>
+                    <div class="hashtag-tag">
+                        #Foley
+                        <span class="remove">&times;</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Types Panel -->
+            <div class="content-panel">
+                <h3>Content Types</h3>
+                <div class="content-toggles">
+                    <div class="toggle-item" data-content="news">
+                        <div class="toggle-switch active"></div>
+                        <span>News Articles</span>
+                    </div>
+                    <div class="toggle-item" data-content="social">
+                        <div class="toggle-switch active"></div>
+                        <span>Social Media</span>
+                    </div>
+                    <div class="toggle-item" data-content="media">
+                        <div class="toggle-switch active"></div>
+                        <span>Photos & Videos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- News Feed -->
+        <div class="news-feed">
+            <div class="feed-header">
+                <h2>Latest News</h2>
+
+                <!-- Filter and Sort Controls -->
+                <div class="feed-controls">
+                    <div class="feed-filters">
+                        <button class="filter-btn active" data-category="all">All</button>
+                        <button class="filter-btn" data-category="local">Local</button>
+                        <button class="filter-btn" data-category="politics">Politics</button>
+                        <button class="filter-btn" data-category="sports">Sports</button>
+                        <button class="filter-btn" data-category="weather">Weather</button>
+                    </div>
+                    <div class="feed-sort">
+                        <span class="sort-label">Sort by:</span>
+                        <button class="sort-btn active" data-sort="newest">Newest</button>
+                        <button class="sort-btn" data-sort="day">Today</button>
+                        <button class="sort-btn" data-sort="month">This Month</button>
+                    </div>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="feed-search">
+                    <div class="search-container">
+                        <input type="text" class="search-input" id="searchInput" placeholder="Search news articles...">
+                        <button class="search-clear" id="searchClear">&times;</button>
+                        <span class="search-icon">🔍</span>
+                    </div>
+                    <div class="search-results-info" id="searchResults"></div>
+                </div>
+            </div>
+
+            <!-- News Items Container -->
+            <div id="newsContainer">
+                <!-- News Article Example -->
+                <div class="news-item" data-timestamp="2025-09-26T20:00:00" data-category="local" data-content-type="news">
+                    <div class="news-meta">
+                        <span class="content-type-badge badge-news">NEWS</span>
+                        <span class="news-source">Baldwin Times</span>
+                        <span>2 hours ago</span>
+                        <a href="https://baldwintimes.com/news/orange-beach-waterfront-development-approved" target="_blank" class="citation-link">🔗 Source</a>
+                    </div>
+                    <a href="https://baldwintimes.com/news/orange-beach-waterfront-development-approved" target="_blank" class="news-title">New Development Project Approved for Orange Beach Waterfront</a>
+                    <div class="news-excerpt">
+                        The Orange Beach City Council unanimously approved a new mixed-use development project that will bring retail, dining, and residential spaces to the waterfront district...
+                    </div>
+                    <div class="news-tags">
+                        <span class="news-tag">Development</span>
+                        <span class="news-tag">Orange Beach</span>
+                        <span class="news-tag">Waterfront</span>
+                    </div>
+                </div>
+
+                <!-- Twitter Social Post Example -->
+                <div class="news-item social-post" data-timestamp="2025-09-26T19:30:00" data-category="local" data-content-type="social">
+                    <div class="news-meta">
+                        <span class="content-type-badge badge-social">SOCIAL</span>
+                        <span class="news-source">@OrangeBeachAL</span>
+                        <span class="social-platform-indicator">
+                            <div class="platform-icon platform-twitter">T</div>
+                            Twitter
+                        </span>
+                        <span>2.5 hours ago</span>
+                        <a href="https://twitter.com/OrangeBeachAL/status/1234567890" target="_blank" class="citation-link">🔗 Tweet</a>
+                    </div>
+                    <a href="https://twitter.com/OrangeBeachAL/status/1234567890" target="_blank" class="news-title">🎉 Exciting news! The waterfront development project is officially approved!</a>
+                    <div class="news-excerpt">
+                        We can't wait to see the new retail and dining spaces come to life on our beautiful waterfront. Thank you to everyone who attended the public meetings! #OrangeBeach #Development #Community
+                    </div>
+                    <div class="news-tags">
+                        <span class="news-tag">#OrangeBeach</span>
+                        <span class="news-tag">#Development</span>
+                        <span class="news-tag">#Community</span>
+                    </div>
+                </div>
+
+                <!-- News Article Example -->
+                <div class="news-item" data-timestamp="2025-09-26T18:00:00" data-category="local" data-content-type="news">
+                    <div class="news-meta">
+                        <span class="content-type-badge badge-news">NEWS</span>
+                        <span class="news-source">Gulf Coast News</span>
+                        <span>4 hours ago</span>
+                        <a href="https://gulfcoastnews.com/baldwin-county-schools-technology-initiative" target="_blank" class="citation-link">🔗 Source</a>
+                    </div>
+                    <a href="https://gulfcoastnews.com/baldwin-county-schools-technology-initiative" target="_blank" class="news-title">Baldwin County Schools Announce New Technology Initiative</a>
+                    <div class="news-excerpt">
+                        A $2.5 million technology grant will provide tablets and improved internet infrastructure to all Baldwin County elementary schools starting next fall...
+                    </div>
+                    <div class="news-tags">
+                        <span class="news-tag">Education</span>
+                        <span class="news-tag">Technology</span>
+                        <span class="news-tag">Schools</span>
+                    </div>
+                </div>
+
+                <!-- Instagram Media Post Example -->
+                <div class="news-item media-post" data-timestamp="2025-09-26T17:15:00" data-category="local" data-content-type="media">
+                    <div class="news-meta">
+                        <span class="content-type-badge badge-media">MEDIA</span>
+                        <span class="news-source">Gulf Shores Photographer</span>
+                        <span class="social-platform-indicator">
+                            <div class="platform-icon platform-instagram">I</div>
+                            Instagram
+                        </span>
+                        <span>4.5 hours ago</span>
+                        <a href="https://instagram.com/p/gulfshores_sunset_123456" target="_blank" class="citation-link">🔗 Post</a>
+                    </div>
+                    <a href="https://instagram.com/p/gulfshores_sunset_123456" target="_blank" class="news-title">Stunning sunset over Gulf Shores beach tonight! 🌅</a>
+                    <div class="news-excerpt">
+                        Another breathtaking evening on the Alabama Gulf Coast. The colors were absolutely incredible tonight!
+                    </div>
+                    <div class="media-preview">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNmZjY2MDA7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSI1MCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNmZmFhMDA7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMDA4OGZmO3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjAwIiBmaWxsPSJ1cmwoI2dyYWQpIi8+PHRleHQgeD0iMjAwIiB5PSIxMDAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkd1bGYgU2hvcmVzIFN1bnNldDwvdGV4dD48L3N2Zz4=" alt="Gulf Shores Sunset">
+                    </div>
+                    <div class="news-tags">
+                        <span class="news-tag">#GulfShores</span>
+                        <span class="news-tag">#Sunset</span>
+                        <span class="news-tag">#Photography</span>
+                    </div>
+                </div>
+
+                <!-- News Article Example -->
+                <div class="news-item" data-timestamp="2025-09-26T16:00:00" data-category="local" data-content-type="news">
+                    <div class="news-meta">
+                        <span class="content-type-badge badge-news">NEWS</span>
+                        <span class="news-source">Foley Observer</span>
+                        <span>6 hours ago</span>
+                        <a href="https://foleyobserver.com/shrimp-festival-breaks-records-2025" target="_blank" class="citation-link">🔗 Source</a>
+                    </div>
+                    <a href="https://foleyobserver.com/shrimp-festival-breaks-records-2025" target="_blank" class="news-title">Annual Shrimp Festival Breaks Attendance Records</a>
+                    <div class="news-excerpt">
+                        The 2025 Annual Shrimp Festival in Gulf Shores welcomed over 300,000 visitors over the weekend, setting a new attendance record for the popular event...
+                    </div>
+                    <div class="news-tags">
+                        <span class="news-tag">Festival</span>
+                        <span class="news-tag">Gulf Shores</span>
+                        <span class="news-tag">Tourism</span>
+                    </div>
+                </div>
+
+                <!-- TikTok Social Post Example -->
+                <div class="news-item social-post tiktok" data-timestamp="2025-09-26T15:30:00" data-category="local" data-content-type="social">
+                    <div class="news-meta">
+                        <span class="content-type-badge badge-social">SOCIAL</span>
+                        <span class="news-source">@BaldwinCountyLife</span>
+                        <span class="social-platform-indicator">
+                            <div class="platform-icon platform-tiktok">T</div>
+                            TikTok
+                        </span>
+                        <span>6.5 hours ago</span>
+                        <a href="https://tiktok.com/@baldwincountylife/video/7123456789" target="_blank" class="citation-link">🔗 Video</a>
+                    </div>
+                    <a href="https://tiktok.com/@baldwincountylife/video/7123456789" target="_blank" class="news-title">POV: You're at the best shrimp festival in Alabama! 🦐</a>
+                    <div class="news-excerpt">
+                        The crowd was INSANE this year! Best festival food, live music, and those Gulf Coast vibes. Already planning for next year! #ShrimpFest #BaldwinCounty #Alabama
+                    </div>
+                    <div class="news-tags">
+                        <span class="news-tag">#ShrimpFest</span>
+                        <span class="news-tag">#BaldwinCounty</span>
+                        <span class="news-tag">#Alabama</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Widgets -->
+        <div class="sidebar">
+            <!-- Trending Topics Widget -->
+            <div class="trending">
+                <div class="widget-header">Trending Topics</div>
+                <div class="widget-content">
+                    <div class="trending-item">#BaldwinCounty Development</div>
+                    <div class="trending-item">#GulfShores Beaches</div>
+                    <div class="trending-item">#OrangeBeach Tourism</div>
+                    <div class="trending-item">#Foley Events</div>
+                    <div class="trending-item">#Baldwin Schools</div>
+                </div>
+            </div>
+
+            <!-- Social Media Mentions Widget -->
+            <div class="social-feed">
+                <div class="widget-header">Social Media Mentions</div>
+                <div class="widget-content">
+                    <div class="social-item">
+                        <div class="social-platform platform-twitter">T</div>
+                        <span>Beautiful sunrise at Orange Beach this morning! #OrangeBeach</span>
+                    </div>
+                    <div class="social-item">
+                        <div class="social-platform platform-instagram">I</div>
+                        <span>Great seafood at the Shrimp Festival! #GulfShores</span>
+                    </div>
+                    <div class="social-item">
+                        <div class="social-platform platform-tiktok">T</div>
+                        <span>Best hidden spots in Baldwin County beaches!</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="./js/app.js"></script>
+</body>
+</html>
