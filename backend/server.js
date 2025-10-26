@@ -60,6 +60,11 @@ logger.info(`Serving static files from: ${frontendPath}`);
 const apiRoutes = require('./routes/api');
 app.use('/api', apiRoutes);
 
+// Admin Routes (TEMPORARY - for initial setup only)
+// TODO: Remove these after database setup and initial scrape are complete
+const adminRoutes = require('./routes/admin');
+app.use('/admin', adminRoutes);
+
 // API info endpoint (for when /api is accessed directly)
 app.get('/api', (req, res) => {
   res.json({
