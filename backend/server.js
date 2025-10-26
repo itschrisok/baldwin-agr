@@ -50,7 +50,12 @@ app.use((req, res, next) => {
 const frontendPath = path.join(__dirname, '../frontend');
 app.use(express.static(frontendPath));
 
+// Serve admin dashboard static files
+const adminPublicPath = path.join(__dirname, 'public');
+app.use(express.static(adminPublicPath));
+
 logger.info(`Serving static files from: ${frontendPath}`);
+logger.info(`Serving admin files from: ${adminPublicPath}`);
 
 // ============================================
 // ROUTES

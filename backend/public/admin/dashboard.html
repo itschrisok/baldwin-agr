@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Baldwin County News Hub</title>
+    <link rel="stylesheet" href="./dashboard.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1>Baldwin County News Hub</h1>
+            <p class="subtitle">Admin Dashboard</p>
+        </div>
+        <div class="header-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalArticles">--</div>
+                <div class="stat-label">Total Articles</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeSources">--</div>
+                <div class="stat-label">Active Sources</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="successRate">--</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Left Column: Source Management -->
+        <div class="column column-left">
+            <!-- Sources Panel -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>News Sources</h2>
+                    <div class="panel-actions">
+                        <button class="btn btn-sm" onclick="refreshSources()">Refresh</button>
+                        <button class="btn btn-sm" onclick="enableAllSources()">Enable All</button>
+                        <button class="btn btn-sm" onclick="resetErrors()">Reset Errors</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div id="sourcesList" class="sources-list">
+                        <div class="loading">Loading sources...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Actions -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Quick Actions</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="quick-actions">
+                        <button class="btn btn-success btn-block" onclick="scrapeRSSOnly()">
+                            Scrape RSS Sources Only
+                        </button>
+                        <button class="btn btn-primary btn-block" onclick="scrapeSelected()">
+                            Scrape Selected Sources
+                        </button>
+                        <button class="btn btn-primary btn-block" onclick="scrapeAll()">
+                            Scrape All Enabled Sources
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Right Column: Scraping Controls & Results -->
+        <div class="column column-right">
+            <!-- Scrape Controls -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Scrape Controls</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="control-group">
+                        <label>Timeout (seconds)</label>
+                        <input type="number" id="timeoutInput" value="300" min="10" max="3600" class="form-control">
+                        <small>Maximum time for entire scrape operation</small>
+                    </div>
+                    <div class="control-group">
+                        <label>Max Articles</label>
+                        <input type="number" id="maxArticlesInput" value="100" min="1" max="1000" class="form-control">
+                        <small>Stop after collecting this many articles</small>
+                    </div>
+                    <div class="selected-count">
+                        <strong>Selected:</strong> <span id="selectedCount">0</span> sources
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scrape Status -->
+            <section class="panel" id="scrapeStatusPanel" style="display: none;">
+                <div class="panel-header">
+                    <h2>Scrape Status</h2>
+                    <button class="btn btn-sm btn-danger" onclick="stopScraping()" id="stopBtn">Stop</button>
+                </div>
+                <div class="panel-body">
+                    <div class="status-display">
+                        <div class="status-badge" id="statusBadge">Running</div>
+                        <div class="status-info">
+                            <p><strong>Job ID:</strong> <span id="jobId">--</span></p>
+                            <p><strong>Progress:</strong> <span id="progress">0/0</span></p>
+                            <p><strong>Articles Found:</strong> <span id="articlesFound">0</span></p>
+                            <p><strong>Current:</strong> <span id="currentSource">--</span></p>
+                            <p><strong>Elapsed:</strong> <span id="elapsed">0s</span></p>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Panel -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Results</h2>
+                    <button class="btn btn-sm" onclick="clearResults()">Clear</button>
+                </div>
+                <div class="panel-body">
+                    <div id="resultsList" class="results-list">
+                        <div class="empty-state">No scraping results yet</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Logs Panel -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Recent Scrapes</h2>
+                    <button class="btn btn-sm" onclick="refreshLogs()">Refresh</button>
+                </div>
+                <div class="panel-body">
+                    <div id="logsList" class="logs-list">
+                        <div class="loading">Loading logs...</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="./admin-api.js"></script>
+    <script src="./dashboard.js"></script>
+</body>
+</html>
