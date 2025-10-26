@@ -231,6 +231,155 @@ class ScraperManager {
   }
 
   /**
+   * Run scrapers for selected sources only
+   * @param {Array<number>} sourceIds - Array of source IDs to scrape
+   * @param {Object} options - Scraping options
+   * @returns {Promise<Object>} Scraping results
+   */
+  async scrapeSelected(sourceIds, options = {}) {
+    if (this.isRunning) {
+      logger.warn('Scraping already in progress, skipping...');
+      return { success: false, message: 'Scraping already in progress' };
+    }
+
+    this.isRunning = true;
+    const startTime = Date.now();
+    const { timeout, maxArticles } = options;
+
+    const results = {
+      total: sourceIds.length,
+      successful: 0,
+      failed: 0,
+      articles: 0,
+      details: [],
+    };
+
+    logger.info('='.repeat(50));
+    logger.info(`Starting scraping cycle for ${sourceIds.length} sources...`);
+    logger.info('='.repeat(50));
+
+    // Wrap scraping logic in timeout if specified
+    const scrapePromise = (async () => {
+      for (const sourceId of sourceIds) {
+        const scraper = this.scrapers.get(sourceId);
+
+        if (!scraper) {
+          logger.warn(`No scraper found for source ID: ${sourceId}`);
+          results.failed++;
+          continue;
+        }
+
+        const scrapeStart = Date.now();
+        let status = 'error';
+        let articlesFound = 0;
+        let errorMessage = null;
+
+        try {
+          logger.info(`\nScraping: ${scraper.sourceName}`);
+
+          // Update last_scraped timestamp
+          await this.updateSourceTimestamp(sourceId, 'last_scraped');
+
+          // Run scraper
+          const articles = await scraper.scrape();
+          articlesFound = articles.length;
+
+          if (articles.length > 0) {
+            status = 'success';
+            results.successful++;
+            results.articles += articlesFound;
+            logger.info(
+              `✓ ${scraper.sourceName}: Found ${articlesFound} new articles`
+            );
+
+            // Update last successful scrape
+            await this.updateSourceTimestamp(
+              sourceId,
+              'last_successful_scrape'
+            );
+            await this.updateSourceCount(sourceId, articlesFound);
+          } else {
+            status = 'success';
+            results.successful++;
+            logger.info(`✓ ${scraper.sourceName}: No new articles`);
+          }
+
+          // Check if we've hit max articles limit
+          if (maxArticles && results.articles >= maxArticles) {
+            logger.info(`\nReached max articles limit (${maxArticles}), stopping...`);
+            break;
+          }
+        } catch (error) {
+          status = 'error';
+          errorMessage = error.message;
+          results.failed++;
+          logger.error(`✗ ${scraper.sourceName}: ${error.message}`);
+
+          // Update error count
+          await this.updateSourceError(sourceId, error.message);
+        }
+
+        const duration = Date.now() - scrapeStart;
+
+        // Log scrape operation
+        await this.logScrape(
+          sourceId,
+          status,
+          articlesFound,
+          duration,
+          errorMessage
+        );
+
+        results.details.push({
+          source: scraper.sourceName,
+          status,
+          articles: articlesFound,
+          duration,
+          error: errorMessage,
+        });
+      }
+
+      return results;
+    })();
+
+    // Apply timeout if specified
+    let finalResults;
+    if (timeout) {
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Scraping timeout')), timeout)
+      );
+
+      try {
+        finalResults = await Promise.race([scrapePromise, timeoutPromise]);
+      } catch (error) {
+        logger.warn(`Scraping stopped due to timeout (${timeout}ms)`);
+        finalResults = results; // Return partial results
+        finalResults.timedOut = true;
+      }
+    } else {
+      finalResults = await scrapePromise;
+    }
+
+    const totalDuration = Date.now() - startTime;
+
+    logger.info('='.repeat(50));
+    logger.info('Scraping cycle complete!');
+    logger.info(`Total time: ${(totalDuration / 1000).toFixed(2)}s`);
+    logger.info(`Successful: ${finalResults.successful}/${finalResults.total}`);
+    logger.info(`Failed: ${finalResults.failed}/${finalResults.total}`);
+    logger.info(`New articles: ${finalResults.articles}`);
+    logger.info('='.repeat(50));
+
+    this.isRunning = false;
+
+    return {
+      success: true,
+      duration: totalDuration,
+      ...finalResults,
+    };
+  }
+
+  /**
    * Schedule automated scraping
    */
   startScheduler() {

@@ -12,6 +12,10 @@ const execAsync = promisify(exec);
 const fs = require('fs');
 const path = require('path');
 const { pool } = require('../config/database');
+const ScraperManager = require('../scrapers/ScraperManager');
+
+// Store active scrape jobs in memory
+const scrapeJobs = new Map();
 
 /**
  * Database setup endpoint
@@ -195,6 +199,421 @@ Setup Instructions:
 
 After setup is complete, remove the /admin routes from server.js!
   `);
+});
+
+// ============================================
+// ADMIN DASHBOARD API ENDPOINTS
+// ============================================
+
+/**
+ * GET /admin/api/sources
+ * Get all sources with stats
+ */
+router.get('/api/sources', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        s.*,
+        COUNT(a.id) as article_count,
+        MAX(a.published_at) as latest_article
+      FROM sources s
+      LEFT JOIN articles a ON s.id = a.source_id
+      GROUP BY s.id
+      ORDER BY s.name
+    `);
+
+    res.json({
+      success: true,
+      data: result.rows
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * PATCH /admin/api/sources/:id/toggle
+ * Enable or disable a source
+ */
+router.patch('/api/sources/:id/toggle', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Toggle enabled status
+    const result = await pool.query(`
+      UPDATE sources
+      SET enabled = NOT enabled, updated_at = NOW()
+      WHERE id = $1
+      RETURNING *
+    `, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Source not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result.rows[0]
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /admin/api/sources/:id/test
+ * Test scrape a single source
+ */
+router.post('/api/sources/:id/test', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Initialize scraper if needed
+    if (ScraperManager.scrapers.size === 0) {
+      await ScraperManager.initialize();
+    }
+
+    // Run single scraper
+    const result = await ScraperManager.scrapeSingle(parseInt(id));
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /admin/api/scrape/start
+ * Start a scrape job with options
+ */
+router.post('/api/scrape/start', async (req, res) => {
+  try {
+    const { sourceIds, timeout, maxArticles } = req.body;
+
+    // Check if scrape is already running
+    const runningJob = Array.from(scrapeJobs.values()).find(job => job.status === 'running');
+    if (runningJob) {
+      return res.status(409).json({
+        success: false,
+        error: 'A scrape job is already running',
+        jobId: runningJob.id
+      });
+    }
+
+    // Create job ID
+    const jobId = `scrape-${Date.now()}`;
+
+    // Initialize job
+    const job = {
+      id: jobId,
+      status: 'running',
+      progress: {
+        total: sourceIds ? sourceIds.length : 0,
+        completed: 0,
+        current: null,
+        articles: 0
+      },
+      results: null,
+      startedAt: new Date(),
+      completedAt: null
+    };
+
+    scrapeJobs.set(jobId, job);
+
+    // Run scrape asynchronously
+    (async () => {
+      try {
+        // Initialize scraper if needed
+        if (ScraperManager.scrapers.size === 0) {
+          await ScraperManager.initialize();
+        }
+
+        let results;
+        if (sourceIds && sourceIds.length > 0) {
+          // Scrape selected sources
+          results = await ScraperManager.scrapeSelected(sourceIds, { timeout, maxArticles });
+        } else {
+          // Scrape all
+          results = await ScraperManager.scrapeAll();
+        }
+
+        job.status = 'completed';
+        job.results = results;
+        job.completedAt = new Date();
+      } catch (error) {
+        job.status = 'error';
+        job.error = error.message;
+        job.completedAt = new Date();
+      }
+    })();
+
+    res.json({
+      success: true,
+      jobId,
+      status: 'running'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /admin/api/scrape/status/:jobId
+ * Get status of a scrape job
+ */
+router.get('/api/scrape/status/:jobId', (req, res) => {
+  const { jobId } = req.params;
+  const job = scrapeJobs.get(jobId);
+
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      error: 'Job not found'
+    });
+  }
+
+  res.json({
+    success: true,
+    data: job
+  });
+});
+
+/**
+ * GET /admin/api/logs
+ * Get recent scrape logs
+ */
+router.get('/api/logs', async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const sourceId = req.query.source_id;
+
+    let query = `
+      SELECT
+        sl.*,
+        s.name as source_name
+      FROM scrape_logs sl
+      LEFT JOIN sources s ON sl.source_id = s.id
+    `;
+
+    const params = [];
+    if (sourceId) {
+      query += ' WHERE sl.source_id = $1';
+      params.push(sourceId);
+    }
+
+    query += ' ORDER BY sl.started_at DESC LIMIT $' + (params.length + 1);
+    params.push(limit);
+
+    const result = await pool.query(query, params);
+
+    res.json({
+      success: true,
+      data: result.rows
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /admin/api/stats
+ * Get dashboard statistics
+ */
+router.get('/api/stats', async (req, res) => {
+  try {
+    // Overall stats
+    const overallStats = await pool.query(`
+      SELECT
+        COUNT(*) as total_articles,
+        COUNT(DISTINCT source_id) as active_sources,
+        MAX(created_at) as last_article
+      FROM articles
+    `);
+
+    // Success rate (last 100 scrapes)
+    const successRate = await pool.query(`
+      SELECT
+        COUNT(*) as total,
+        COUNT(CASE WHEN status = 'success' THEN 1 END) as successful,
+        AVG(duration_ms) as avg_duration
+      FROM (
+        SELECT * FROM scrape_logs
+        ORDER BY started_at DESC
+        LIMIT 100
+      ) recent_scrapes
+    `);
+
+    // Per-source stats
+    const sourceStats = await pool.query(`
+      SELECT
+        s.id,
+        s.name,
+        s.enabled,
+        s.error_count,
+        s.last_successful_scrape,
+        COUNT(sl.id) as scrape_count,
+        COUNT(CASE WHEN sl.status = 'success' THEN 1 END) as successful_scrapes
+      FROM sources s
+      LEFT JOIN scrape_logs sl ON s.id = sl.source_id
+      GROUP BY s.id
+      ORDER BY s.name
+    `);
+
+    res.json({
+      success: true,
+      data: {
+        overall: overallStats.rows[0],
+        successRate: successRate.rows[0],
+        sources: sourceStats.rows
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /admin/api/scrape/rss-only
+ * Quick action: Scrape only RSS sources
+ */
+router.post('/api/scrape/rss-only', async (req, res) => {
+  try {
+    // Get RSS source IDs
+    const result = await pool.query(`
+      SELECT id FROM sources
+      WHERE scraper_type = 'rss' AND enabled = true
+    `);
+
+    const sourceIds = result.rows.map(row => row.id);
+
+    if (sourceIds.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'No enabled RSS sources found'
+      });
+    }
+
+    // Create job ID
+    const jobId = `scrape-${Date.now()}`;
+
+    // Initialize job
+    const job = {
+      id: jobId,
+      status: 'running',
+      progress: {
+        total: sourceIds.length,
+        completed: 0,
+        current: null,
+        articles: 0
+      },
+      results: null,
+      startedAt: new Date()
+    };
+
+    scrapeJobs.set(jobId, job);
+
+    // Run scrape asynchronously
+    (async () => {
+      try {
+        if (ScraperManager.scrapers.size === 0) {
+          await ScraperManager.initialize();
+        }
+
+        const results = await ScraperManager.scrapeSelected(sourceIds);
+        job.status = 'completed';
+        job.results = results;
+        job.completedAt = new Date();
+      } catch (error) {
+        job.status = 'error';
+        job.error = error.message;
+        job.completedAt = new Date();
+      }
+    })();
+
+    res.json({
+      success: true,
+      jobId,
+      sourceCount: sourceIds.length,
+      status: 'running'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /admin/api/sources/enable-all
+ * Enable all sources
+ */
+router.post('/api/sources/enable-all', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      UPDATE sources
+      SET enabled = true, updated_at = NOW()
+      RETURNING *
+    `);
+
+    res.json({
+      success: true,
+      count: result.rows.length
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /admin/api/sources/reset-errors
+ * Reset error counts for all sources
+ */
+router.post('/api/sources/reset-errors', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      UPDATE sources
+      SET error_count = 0, last_error = NULL, updated_at = NOW()
+      RETURNING *
+    `);
+
+    res.json({
+      success: true,
+      count: result.rows.length
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
 });
 
 module.exports = router;
