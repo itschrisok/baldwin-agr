@@ -99,9 +99,9 @@ INSERT INTO sources (name, url, type, scraper_type, enabled) VALUES
   ('Baldwin Times', 'https://www.baldwintimes.com', 'news', 'cheerio', true),
   ('Gulf Coast News', 'https://www.gulfcoastnewstoday.com', 'news', 'cheerio', true),
   ('Orange Beach Today', 'https://www.orangebeachtoday.com', 'news', 'cheerio', true),
-  ('AL.com Baldwin', 'https://www.al.com/news/mobile/baldwin/', 'news', 'rss', true),
+  ('AL.com Baldwin', 'https://www.al.com/arc/outboundfeeds/rss/category/news/mobile/baldwin/', 'news', 'rss', true),
   ('Foley Observer', 'https://www.foleyobserver.com', 'news', 'cheerio', true),
-  ('Mobile Register', 'https://www.al.com/mobile/', 'news', 'rss', true),
+  ('Mobile Register', 'https://www.al.com/arc/outboundfeeds/rss/category/news/mobile/', 'news', 'rss', true),
   ('Orange Beach City', 'https://www.orangebeachal.gov/news', 'news', 'cheerio', true);
 
 -- Insert Common Tags

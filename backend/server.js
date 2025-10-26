@@ -119,7 +119,7 @@ app.use((err, req, res, next) => {
 // START SERVER
 // ============================================
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   logger.info(`
   ╔═══════════════════════════════════════════╗
   ║   Baldwin County News Hub - Backend      ║
@@ -131,11 +131,20 @@ app.listen(PORT, () => {
   `);
 });
 
-// Graceful shutdown
+// Graceful shutdown handlers
 process.on('SIGTERM', () => {
   logger.info('SIGTERM signal received: closing HTTP server');
-  app.close(() => {
+  server.close(() => {
     logger.info('HTTP server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  logger.info('SIGINT signal received: closing HTTP server');
+  server.close(() => {
+    logger.info('HTTP server closed');
+    process.exit(0);
   });
 });
 

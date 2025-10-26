@@ -146,6 +146,38 @@
         </div>
     </main>
 
+    <!-- Edit Source Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Source</h3>
+                <button class="modal-close" id="modalCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editSourceName">Source Name</label>
+                    <input type="text" id="editSourceName" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="editSourceUrl">URL (RSS Feed URL for RSS sources)</label>
+                    <input type="text" id="editSourceUrl" class="form-control" placeholder="https://..." />
+                </div>
+                <div class="form-group">
+                    <label for="editSourceType">Scraper Type</label>
+                    <select id="editSourceType" class="form-control">
+                        <option value="rss">RSS</option>
+                        <option value="cheerio">Cheerio</option>
+                        <option value="puppeteer">Puppeteer</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modalCancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="modalSaveBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 

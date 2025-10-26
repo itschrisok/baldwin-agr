@@ -270,6 +270,75 @@ router.patch('/api/sources/:id/toggle', async (req, res) => {
 });
 
 /**
+ * PATCH /admin/api/sources/:id
+ * Update source details (URL, name, etc.)
+ */
+router.patch('/api/sources/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { url, name, scraper_type, enabled } = req.body;
+
+    // Build dynamic update query based on provided fields
+    const updates = [];
+    const values = [];
+    let paramCount = 1;
+
+    if (url !== undefined) {
+      updates.push(`url = $${paramCount++}`);
+      values.push(url);
+    }
+    if (name !== undefined) {
+      updates.push(`name = $${paramCount++}`);
+      values.push(name);
+    }
+    if (scraper_type !== undefined) {
+      updates.push(`scraper_type = $${paramCount++}`);
+      values.push(scraper_type);
+    }
+    if (enabled !== undefined) {
+      updates.push(`enabled = $${paramCount++}`);
+      values.push(enabled);
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'No fields to update'
+      });
+    }
+
+    updates.push(`updated_at = NOW()`);
+    values.push(id);
+
+    const query = `
+      UPDATE sources
+      SET ${updates.join(', ')}
+      WHERE id = $${paramCount}
+      RETURNING *
+    `;
+
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Source not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result.rows[0]
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
  * POST /admin/api/sources/:id/test
  * Test scrape a single source
  */

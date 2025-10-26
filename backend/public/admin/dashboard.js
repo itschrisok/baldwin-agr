@@ -9,7 +9,8 @@ const state = {
     selectedSources: new Set(),
     currentJobId: null,
     pollingInterval: null,
-    jobStartTime: null
+    jobStartTime: null,
+    editingSourceId: null
 };
 
 // ============================================
@@ -38,6 +39,11 @@ function setupEventListeners() {
     document.getElementById('clearResultsBtn').addEventListener('click', clearResults);
     document.getElementById('refreshLogsBtn').addEventListener('click', refreshLogs);
 
+    // Modal buttons
+    document.getElementById('modalCloseBtn').addEventListener('click', closeEditModal);
+    document.getElementById('modalCancelBtn').addEventListener('click', closeEditModal);
+    document.getElementById('modalSaveBtn').addEventListener('click', saveSourceEdit);
+
     // Event delegation for dynamically generated source items
     document.getElementById('sourcesList').addEventListener('click', handleSourceClick);
 }
@@ -49,6 +55,12 @@ function handleSourceClick(e) {
     if (target.classList.contains('source-checkbox')) {
         const sourceId = parseInt(target.closest('.source-item').dataset.sourceId);
         toggleSourceSelection(sourceId);
+    }
+
+    // Handle edit button
+    if (target.textContent === 'Edit') {
+        const sourceId = parseInt(target.closest('.source-item').dataset.sourceId);
+        openEditModal(sourceId);
     }
 
     // Handle enable/disable button
@@ -140,6 +152,9 @@ function renderSources() {
                 <span>Last: ${source.last_successful_scrape ? formatTimeAgo(source.last_successful_scrape) : 'Never'}</span>
             </div>
             <div class="source-actions">
+                <button class="btn btn-sm btn-edit">
+                    Edit
+                </button>
                 <button class="btn btn-sm">
                     ${source.enabled ? 'Disable' : 'Enable'}
                 </button>
@@ -224,6 +239,58 @@ function refreshSources() {
 
 function updateSelectedCount() {
     document.getElementById('selectedCount').textContent = state.selectedSources.size;
+}
+
+// ============================================
+// SOURCE EDITING MODAL
+// ============================================
+
+function openEditModal(sourceId) {
+    const source = state.sources.find(s => s.id === sourceId);
+    if (!source) {
+        showToast('Source not found', 'error');
+        return;
+    }
+
+    // Store current source ID in state
+    state.editingSourceId = sourceId;
+
+    // Populate modal fields
+    document.getElementById('editSourceName').value = source.name;
+    document.getElementById('editSourceUrl').value = source.url;
+    document.getElementById('editSourceType').value = source.scraper_type;
+
+    // Show modal
+    document.getElementById('editModal').classList.add('show');
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.remove('show');
+    state.editingSourceId = null;
+}
+
+async function saveSourceEdit() {
+    const sourceId = state.editingSourceId;
+    if (!sourceId) return;
+
+    const name = document.getElementById('editSourceName').value.trim();
+    const url = document.getElementById('editSourceUrl').value.trim();
+    const scraper_type = document.getElementById('editSourceType').value;
+
+    if (!name || !url) {
+        showToast('Name and URL are required', 'error');
+        return;
+    }
+
+    try {
+        await AdminAPI.updateSource(sourceId, { name, url, scraper_type });
+        showToast('Source updated successfully', 'success');
+        closeEditModal();
+        await loadSources();
+    } catch (error) {
+        console.error('Error updating source:', error);
+        showToast('Failed to update source: ' + error.message, 'error');
+    }
 }
 
 // ============================================

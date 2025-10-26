@@ -65,6 +65,16 @@ const AdminAPI = {
     },
 
     /**
+     * Update source details (URL, name, scraper_type, etc.)
+     */
+    async updateSource(sourceId, updates) {
+        return this.request(`/sources/${sourceId}`, {
+            method: 'PATCH',
+            body: JSON.stringify(updates)
+        });
+    },
+
+    /**
      * Enable all sources
      */
     async enableAllSources() {
