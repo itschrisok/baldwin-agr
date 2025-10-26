@@ -18,8 +18,51 @@ const state = {
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Admin Dashboard loaded');
+    setupEventListeners();
     init();
 });
+
+function setupEventListeners() {
+    // Source management buttons
+    document.getElementById('refreshSourcesBtn').addEventListener('click', refreshSources);
+    document.getElementById('enableAllBtn').addEventListener('click', enableAllSources);
+    document.getElementById('resetErrorsBtn').addEventListener('click', resetErrors);
+
+    // Scraping action buttons
+    document.getElementById('scrapeRSSBtn').addEventListener('click', scrapeRSSOnly);
+    document.getElementById('scrapeSelectedBtn').addEventListener('click', scrapeSelected);
+    document.getElementById('scrapeAllBtn').addEventListener('click', scrapeAll);
+
+    // Status and control buttons
+    document.getElementById('stopBtn').addEventListener('click', stopScraping);
+    document.getElementById('clearResultsBtn').addEventListener('click', clearResults);
+    document.getElementById('refreshLogsBtn').addEventListener('click', refreshLogs);
+
+    // Event delegation for dynamically generated source items
+    document.getElementById('sourcesList').addEventListener('click', handleSourceClick);
+}
+
+function handleSourceClick(e) {
+    const target = e.target;
+
+    // Handle checkbox toggle
+    if (target.classList.contains('source-checkbox')) {
+        const sourceId = parseInt(target.closest('.source-item').dataset.sourceId);
+        toggleSourceSelection(sourceId);
+    }
+
+    // Handle enable/disable button
+    if (target.textContent === 'Enable' || target.textContent === 'Disable') {
+        const sourceId = parseInt(target.closest('.source-item').dataset.sourceId);
+        toggleSourceEnabled(sourceId);
+    }
+
+    // Handle test button
+    if (target.textContent === 'Test') {
+        const sourceId = parseInt(target.closest('.source-item').dataset.sourceId);
+        testSource(sourceId);
+    }
+}
 
 async function init() {
     await loadDashboardStats();
@@ -87,8 +130,7 @@ function renderSources() {
                 <input type="checkbox"
                        class="source-checkbox"
                        ${source.enabled ? '' : 'disabled'}
-                       ${state.selectedSources.has(source.id) ? 'checked' : ''}
-                       onchange="toggleSourceSelection(${source.id})">
+                       ${state.selectedSources.has(source.id) ? 'checked' : ''}>
                 <span class="source-name">${source.name}</span>
                 <span class="source-badge badge-${source.scraper_type}">${source.scraper_type.toUpperCase()}</span>
             </div>
@@ -98,10 +140,10 @@ function renderSources() {
                 <span>Last: ${source.last_successful_scrape ? formatTimeAgo(source.last_successful_scrape) : 'Never'}</span>
             </div>
             <div class="source-actions">
-                <button class="btn btn-sm" onclick="toggleSourceEnabled(${source.id})">
+                <button class="btn btn-sm">
                     ${source.enabled ? 'Disable' : 'Enable'}
                 </button>
-                <button class="btn btn-sm btn-primary" onclick="testSource(${source.id})" ${!source.enabled ? 'disabled' : ''}>
+                <button class="btn btn-sm btn-primary" ${!source.enabled ? 'disabled' : ''}>
                     Test
                 </button>
             </div>

@@ -38,9 +38,9 @@
                 <div class="panel-header">
                     <h2>News Sources</h2>
                     <div class="panel-actions">
-                        <button class="btn btn-sm" onclick="refreshSources()">Refresh</button>
-                        <button class="btn btn-sm" onclick="enableAllSources()">Enable All</button>
-                        <button class="btn btn-sm" onclick="resetErrors()">Reset Errors</button>
+                        <button class="btn btn-sm" id="refreshSourcesBtn">Refresh</button>
+                        <button class="btn btn-sm" id="enableAllBtn">Enable All</button>
+                        <button class="btn btn-sm" id="resetErrorsBtn">Reset Errors</button>
                     </div>
                 </div>
                 <div class="panel-body">
@@ -57,13 +57,13 @@
                 </div>
                 <div class="panel-body">
                     <div class="quick-actions">
-                        <button class="btn btn-success btn-block" onclick="scrapeRSSOnly()">
+                        <button class="btn btn-success btn-block" id="scrapeRSSBtn">
                             Scrape RSS Sources Only
                         </button>
-                        <button class="btn btn-primary btn-block" onclick="scrapeSelected()">
+                        <button class="btn btn-primary btn-block" id="scrapeSelectedBtn">
                             Scrape Selected Sources
                         </button>
-                        <button class="btn btn-primary btn-block" onclick="scrapeAll()">
+                        <button class="btn btn-primary btn-block" id="scrapeAllBtn">
                             Scrape All Enabled Sources
                         </button>
                     </div>
@@ -99,7 +99,7 @@
             <section class="panel" id="scrapeStatusPanel" style="display: none;">
                 <div class="panel-header">
                     <h2>Scrape Status</h2>
-                    <button class="btn btn-sm btn-danger" onclick="stopScraping()" id="stopBtn">Stop</button>
+                    <button class="btn btn-sm btn-danger" id="stopBtn">Stop</button>
                 </div>
                 <div class="panel-body">
                     <div class="status-display">
@@ -122,7 +122,7 @@
             <section class="panel">
                 <div class="panel-header">
                     <h2>Results</h2>
-                    <button class="btn btn-sm" onclick="clearResults()">Clear</button>
+                    <button class="btn btn-sm" id="clearResultsBtn">Clear</button>
                 </div>
                 <div class="panel-body">
                     <div id="resultsList" class="results-list">
@@ -135,7 +135,7 @@
             <section class="panel">
                 <div class="panel-header">
                     <h2>Recent Scrapes</h2>
-                    <button class="btn btn-sm" onclick="refreshLogs()">Refresh</button>
+                    <button class="btn btn-sm" id="refreshLogsBtn">Refresh</button>
                 </div>
                 <div class="panel-body">
                     <div id="logsList" class="logs-list">
